@@ -1,6 +1,6 @@
-# GCT Report Parser
+# Report Parser
 
-A clean Python web application for parsing Android certification **Tradefed result ZIPs** and generating a unified release-readiness dashboard.
+A Python web application for parsing Android certification **Tradefed result ZIPs** and generating a unified release-readiness dashboard.
 
 The tool is designed for Android automation and certification workflows where CTS, GTS, TVTS, STS, VTS, CTS-on-GSI and CTS Verifier reports need to be reviewed together.
 
@@ -51,8 +51,8 @@ data/gct_report_parser.db
 For a fresh Linux/WSL user, the application can now be started with **one command** after cloning:
 
 ```bash
-git clone https://github.com/bhanuroyal002/GCT_Report_Parser.git
-cd GCT_Report_Parser
+git clone https://github.com/bhanuroyal002/Report_Parser.git
+cd Report_Parser
 ./start.sh
 ```
 
@@ -83,27 +83,23 @@ Flask's development server is suitable for local development; do not use it as t
 
 ## Team/server usage
 
-For a Linux server where teammates need to access the application over the network, configure:
+For the shared Linux server, the application should run as a persistent Gunicorn service. Teammates only need a browser and access to the corporate VPN.
+
+Then run Gunicorn on the server:
 
 ```bash
-export HOST=0.0.0.0
-export PORT=8080
-python app.py
+.venv/bin/gunicorn --workers 2 --bind 0.0.0.0:8080 app:app
 ```
 
-Then teammates can open:
+Teammates can then open:
 
 ```text
 http://<server-ip>:8080
 ```
 
-For a more stable server process, use Gunicorn:
+For this internal deployment, no application installation is required on team laptops. They only need to connect to the corporate VPN and use a browser.
 
-```bash
-gunicorn --workers 2 --bind 0.0.0.0:8080 app:app
-```
-
-The Flask application can also be placed behind an existing reverse proxy or tunnel.
+For production, do not expose Flask's development server directly. Flask recommends a production WSGI server such as Gunicorn. citeturn0search1turn0search2
 
 ## Optional configuration
 
@@ -263,7 +259,7 @@ Back up this file if historical analysis data needs to be preserved.
 ## Project structure
 
 ```text
-GCT_Report_Parser/
+Report_Parser/
 ├── start.sh
 ├── app.py
 ├── parser.py
@@ -314,22 +310,24 @@ gunicorn --workers 2 --bind 0.0.0.0:8080 app:app
 For an internal team server, the recommended architecture is:
 
 ```text
-Teammate Browser
-       |
-       v
-Reverse Proxy / Cloudflare Tunnel / LAN
-       |
-       v
+Team Laptop
+    |
+    | GlobalProtect VPN
+    v
+Corporate Network
+    |
+    v
+Linux Server (<server-ip>)
+    |
+    v
 Gunicorn :8080
-       |
-       v
-Flask Application
-       |
-       +---- parser.py
-       |
-       +---- history.py
-       |
-       +---- SQLite
+    |
+    v
+Flask Report Parser
+    |
+    +---- parser.py
+    +---- history.py
+    +---- SQLite
 ```
 
 ## License
